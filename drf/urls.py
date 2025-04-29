@@ -1,15 +1,15 @@
 from django.urls import path
-from .views import RegisterAPIView, LoginAPIView, LogoutAPIView, ProfileAPIView, ProfileUpdateAPIView, ProfileDeleteAPIView, ChangePasswordView,AuthOne, AuthTwo, send_mail_page
+from .views import *
 
 urlpatterns = [
-    path('', RegisterAPIView.as_view()),
-    path('login/', LoginAPIView.as_view()),
-    path('logout/', LogoutAPIView.as_view()),
-    path('profil/', ProfileAPIView.as_view()),
-    path('profil-update/', ProfileUpdateAPIView.as_view()),
-    path('profil-delete/', ProfileDeleteAPIView.as_view()),
-    path('change-password/', ChangePasswordView.as_view()),
-    path('auth-one/', AuthOne.as_view()),
-    path('auth-two/', AuthTwo.as_view()),
-    path('send-mail/', send_mail_page)
+    path('', Main.as_view(), name='main'),
+    path('register/', RegisterAPIView.as_view(), name='register'),
+    path('login/', LoginAPIView.as_view(), name='login'),
+    path('logout/', LogoutAPIView.as_view(), name='logout'),
+    path('profile/', ProfileAPIView.as_view(), name='profile'),
+    path('profile/update/', ProfileUpdateAPIView.as_view(), name='profile_update'),
+    path('profile/delete/', ProfileDeleteAPIView.as_view(), name='profile_delete'),
+    path('change-password/', ChangePasswordView.as_view(), name='change-password'),
+    path('auth_one/', AuthOne.as_view(), name='auth_one'),
+    path('auth_two/', AuthTwo.as_view(), name='auth_two'),
 ]

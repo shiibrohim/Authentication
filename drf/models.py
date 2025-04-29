@@ -1,34 +1,35 @@
-from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
+from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin
 from django.db import models
 
 
 class CustomUserManager(BaseUserManager):
     def create_user(self, email, phone, password=None, **extra_fields):
         if not email:
-            raise ValueError('Email manzili kiriting!')
+            raise ValueError('Email manzili kiriting')
         if not phone:
-            raise ValueError('Telefon raqam kiriting!')
+            raise ValueError('Telefon raqam kiriting')
         email = self.normalize_email(email)
         user = self.model(email=email, phone=phone, **extra_fields)
         user.set_password(password)
         user.save(using=self._db)
         return user
 
-    def create_superuser(self, email, phone, password=None, **extra_fields):
+    def create_superuser(self,email, phone, password=None, **extra_fields):
         extra_fields.setdefault('is_staff', True)
         extra_fields.setdefault('is_superuser', True)
 
-        return self.create_user(email, phone, password, **extra_fields)
+        return self.create_user(email=email, phone=phone, password=password, **extra_fields)
 
 
-class CustomUser(AbstractBaseUser):
+class CustomUser(AbstractBaseUser, PermissionsMixin):
     email = models.EmailField(unique=True)
     phone = models.CharField(max_length=12, unique=True)
     first_name = models.CharField(max_length=50)
     last_name = models.CharField(max_length=50)
-    created = models.DateTimeField(auto_now_add=True)
+    date_joined = models.DateTimeField(auto_now_add=True)
     is_active = models.BooleanField(default=True)
     is_staff = models.BooleanField(default=False)
+    is_superuser = models.BooleanField(default=False)
 
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = ['phone']
@@ -44,7 +45,6 @@ class CustomUser(AbstractBaseUser):
     def get_short_name(self):
         return self.first_name
 
-
 class OTP(models.Model):
     phone = models.CharField(max_length=12)
     key = models.CharField(max_length=100)
@@ -58,3 +58,47 @@ class OTP(models.Model):
         if self.tried >= 3:
             self.is_expire = True
         super(OTP, self).save(*args, **kwargs)
+
+
+
+
+
+
+from django.contrib.auth.models import AbstractUser, Group, Permission
+from django.db import models
+
+# Custom User Model
+class CustomUser(AbstractUser):
+    groups = models.ManyToManyField(
+        Group,
+        related_name='customuser_groups',  # O'zgartirilgan related_name
+        blank=True,
+        through='CustomUserGroup',  # Intermediate model
+    )
+    user_permissions = models.ManyToManyField(
+        Permission,
+        related_name='customuser_permissions',  # O'zgartirilgan related_name
+        blank=True,
+        through='CustomUserPermission',  # Intermediate model
+    )
+
+    def __str__(self):
+        return self.username
+
+
+# Intermediate model for groups
+class CustomUserGroup(models.Model):
+    customuser = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
+    group = models.ForeignKey(Group, on_delete=models.CASCADE)
+
+    def __str__(self):
+        return f'{self.customuser} - {self.group}'
+
+
+# Intermediate model for user_permissions
+class CustomUserPermission(models.Model):
+    customuser = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
+    permission = models.ForeignKey(Permission, on_delete=models.CASCADE)
+
+    def __str__(self):
+        return f'{self.customuser} - {self.permission}'

@@ -1,9 +1,9 @@
+
 from rest_framework import serializers
 from django.contrib.auth import authenticate
 from django.contrib.auth import get_user_model
 
 User = get_user_model()
-
 
 class RegisterSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True)
@@ -30,7 +30,7 @@ class LoginSerializer(serializers.Serializer):
         if user:
             data['user'] = user
             return data
-        raise serializers.ValidationError("Email yoki passwordda xatolik!")
+        raise serializers.ValidationError("Email yoki password xato!")
 
 
 class UserSerializer(serializers.ModelSerializer):
